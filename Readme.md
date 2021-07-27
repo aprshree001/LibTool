@@ -20,3 +20,7 @@ java
 
 Rest API (Documentation)
 https://documenter.getpostman.com/view/16840293/Tzscnko3
+
+Running test case
+
+./mvnw test
