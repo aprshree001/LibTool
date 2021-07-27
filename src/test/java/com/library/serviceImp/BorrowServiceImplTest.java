@@ -150,45 +150,6 @@ public class BorrowServiceImplTest {
 	}
 
 	@Test
-	public void returnBookFromBorrowedItemsWhenWrongLibrary() {
-		BookEntity bookEntity = new BookEntity();
-		bookEntity.setAuthorName("Dummy");
-		bookEntity.setBookId("121");
-		bookEntity.setLibId(1);
-		bookEntity.setNoOfCopies(2);
-
-		when(bookRepo.findById("121")).thenReturn(Optional.of(bookEntity));
-		BorrowRequestDto borrowRequestDto2 = new BorrowRequestDto();
-		borrowRequestDto2.setBookid("121");
-
-		UserDetail userDetails = new UserDetail();
-		userDetails.setEmail("tempUser@gmail.com");
-		when(userRepo.findByEmail(anyString())).thenReturn(userDetails);
-		BorrowEntity borrowEntity = new BorrowEntity();
-
-		borrowEntity.setBookId(borrowRequestDto2.getBookid());
-		borrowEntity.setNoOfBook(borrowRequestDto2.getQuantity());
-
-		when(borrowMapper.toBorrow(borrowRequestDto2)).thenReturn(borrowEntity);
-
-		Limit limit = new Limit();
-		limit.setLimitValue(2);
-		when(limitRepository.findByLimitName(anyString())).thenReturn(limit);
-
-		when(bookRepo.save(bookEntity)).thenReturn(bookEntity);
-
-		when(borrowRepo.save(borrowEntity)).thenReturn(borrowEntity);
-		try {
-			borrowserviceimpl.returnBookFromBorrowedItems(borrowRequestDto2);
-
-		} catch (Exception e) {
-
-			assertTrue(e instanceof LibraryEntityNotFoundException);
-			// TODO: handle exception
-		}
-	}
-
-	@Test
 	public void returnBookFromBorrowedItemsSucess() {
 		BookEntity bookEntity = new BookEntity();
 		bookEntity.setAuthorName("Dummy");
@@ -212,9 +173,8 @@ public class BorrowServiceImplTest {
 
 		when(borrowRepo.findByUserIdAndBookId(anyString(), anyString())).thenReturn(Optional.of(borrowEntity));
 
-	
 		borrowserviceimpl.returnBookFromBorrowedItems(borrowRequestDto2);
 
-		verify(borrowRepo,times(1)).removeBorrowBookFromUser(anyString(),anyString());
+		verify(borrowRepo, times(1)).removeBorrowBookFromUser(anyString(), anyString());
 	}
 }
