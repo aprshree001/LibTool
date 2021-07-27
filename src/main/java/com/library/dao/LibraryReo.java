@@ -16,7 +16,5 @@ import com.library.modal.Library;
 @RepositoryRestResource(path = "Library" )
 public interface LibraryReo extends CrudRepository<Library, Integer> {
 
-	@Query("SELECT l FROM Library l inner join BookEntity b on b.libId = l.libId  where l.libId = :libId")
-	List<BookEntity> findAllBookByLibId(@Param("libId") Integer libId);
 
 }

@@ -21,6 +21,7 @@ import com.library.dao.BookRepo;
 import com.library.dao.BorrowRepo;
 import com.library.dao.LimitRepository;
 import com.library.dao.UserRepo;
+import com.library.exception.LibraryEntityNotFoundException;
 import com.library.exception.LimitViolationException;
 import com.library.exception.OutOfStockException;
 import com.library.modal.BookEntity;
@@ -131,15 +132,9 @@ public class BorrowServiceImplTest {
 		borrowEntity.setBookId(borrowRequestDto2.getBookid());
 		borrowEntity.setNoOfBook(borrowRequestDto2.getQuantity());
 
-		when(borrowMapper.toBorrow(borrowRequestDto2)).thenReturn(borrowEntity);
-
 		Limit limit = new Limit();
 		limit.setLimitValue(0);
 		when(limitRepository.findByLimitName(anyString())).thenReturn(limit);
-
-		when(bookRepo.save(bookEntity)).thenReturn(bookEntity);
-
-		when(borrowRepo.save(borrowEntity)).thenReturn(borrowEntity);
 
 		try {
 			borrowserviceimpl.addBookToBorrowItems(borrowRequestDto2);
@@ -147,11 +142,79 @@ public class BorrowServiceImplTest {
 		} catch (Exception e) {
 
 			assertTrue(e instanceof LimitViolationException);
-	
+
 			verify(limitRepository, times(1)).findByLimitName(anyString());
 
 		}
 
 	}
 
+	@Test
+	public void returnBookFromBorrowedItemsWhenWrongLibrary() {
+		BookEntity bookEntity = new BookEntity();
+		bookEntity.setAuthorName("Dummy");
+		bookEntity.setBookId("121");
+		bookEntity.setLibId(1);
+		bookEntity.setNoOfCopies(2);
+
+		when(bookRepo.findById("121")).thenReturn(Optional.of(bookEntity));
+		BorrowRequestDto borrowRequestDto2 = new BorrowRequestDto();
+		borrowRequestDto2.setBookid("121");
+
+		UserDetail userDetails = new UserDetail();
+		userDetails.setEmail("tempUser@gmail.com");
+		when(userRepo.findByEmail(anyString())).thenReturn(userDetails);
+		BorrowEntity borrowEntity = new BorrowEntity();
+
+		borrowEntity.setBookId(borrowRequestDto2.getBookid());
+		borrowEntity.setNoOfBook(borrowRequestDto2.getQuantity());
+
+		when(borrowMapper.toBorrow(borrowRequestDto2)).thenReturn(borrowEntity);
+
+		Limit limit = new Limit();
+		limit.setLimitValue(2);
+		when(limitRepository.findByLimitName(anyString())).thenReturn(limit);
+
+		when(bookRepo.save(bookEntity)).thenReturn(bookEntity);
+
+		when(borrowRepo.save(borrowEntity)).thenReturn(borrowEntity);
+		try {
+			borrowserviceimpl.returnBookFromBorrowedItems(borrowRequestDto2);
+
+		} catch (Exception e) {
+
+			assertTrue(e instanceof LibraryEntityNotFoundException);
+			// TODO: handle exception
+		}
+	}
+
+	@Test
+	public void returnBookFromBorrowedItemsSucess() {
+		BookEntity bookEntity = new BookEntity();
+		bookEntity.setAuthorName("Dummy");
+		bookEntity.setBookId("121");
+		bookEntity.setLibId(1);
+		bookEntity.setNoOfCopies(2);
+
+		when(bookRepo.findById("121")).thenReturn(Optional.of(bookEntity));
+		BorrowRequestDto borrowRequestDto2 = new BorrowRequestDto();
+		borrowRequestDto2.setBookid("121");
+		borrowRequestDto2.setQuantity(1);
+
+		UserDetail userDetails = new UserDetail();
+		userDetails.setUserId("121");
+		userDetails.setEmail("tempUser@gmail.com");
+		when(userRepo.findByEmail(anyString())).thenReturn(userDetails);
+		BorrowEntity borrowEntity = new BorrowEntity();
+		borrowEntity.setNoOfBook(2);
+		borrowEntity.setBookId(borrowRequestDto2.getBookid());
+		borrowEntity.setNoOfBook(borrowRequestDto2.getQuantity());
+
+		when(borrowRepo.findByUserIdAndBookId(anyString(), anyString())).thenReturn(Optional.of(borrowEntity));
+
+	
+		borrowserviceimpl.returnBookFromBorrowedItems(borrowRequestDto2);
+
+		verify(borrowRepo,times(1)).removeBorrowBookFromUser(anyString(),anyString());
+	}
 }

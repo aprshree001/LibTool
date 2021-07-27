@@ -80,9 +80,9 @@ class e2eTest {
 	@Test
 	void test_GivenWhenUserRequestBorowBook_thenAddedInBorrowList() {
 
-		HttpHeaders header = getSignedTokenHeader("amitkumar@gmail.com", "Hello");
+		HttpHeaders header = getSignedTokenHeader("aparna@gmail.com", "Hello");
 
-		reserveBook("120", header);
+		reserveBook("123", header);
 
 	}
 
@@ -175,6 +175,27 @@ class e2eTest {
 		assertEquals(HttpStatus.OK, responseReturnBook.getStatusCode());
 
 		assertEquals(getBookById("125", header).getNoOfCopies(), initalnumberofQuantity);
+
+	}
+
+	@Test
+	void test_GivenWhenUserAddLastBook_thenRemoveBookFromLibrary() {
+
+		HttpHeaders header = getSignedTokenHeader("amitkumar@gmail.com", "Hello");
+
+		int initalnumberofQuantity = getBookById("126", header).getNoOfCopies();
+
+		reserveBook("126", header);
+
+		assertEquals(getBookById("126", header).getNoOfCopies(), initalnumberofQuantity - 1);
+
+		ResponseEntity<List<BookEntity>> response = restTemplate.exchange(createURLWithPort("/api/library/books/1"),
+				HttpMethod.GET, new HttpEntity(header), new ParameterizedTypeReference<List<BookEntity>>() {
+				});
+
+		assertEquals(HttpStatus.OK, response.getStatusCode());
+
+		assertFalse(response.getBody().contains(getBookById("126", header)));
 
 	}
 

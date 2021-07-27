@@ -23,6 +23,9 @@ import com.library.modal.BookEntity;
 import com.library.modal.Library;
 import com.library.service.BookServiceInterface;
 
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
 @RepositoryRestController
 @RequestMapping("/api/books")
 public class BookController {
@@ -41,9 +44,9 @@ public class BookController {
 	public ResponseEntity<Page<BookEntity>> getBooks(@RequestParam(defaultValue = "0") int page,
 			@RequestParam(defaultValue = "3") int size) {
 
+		log.trace(">> getBooks");
 		Pageable paging = PageRequest.of(page, size);
 		Page<BookEntity> response = bookRepository.findAll(paging);
-
 		return new ResponseEntity<Page<BookEntity>>(response, HttpStatus.CREATED);
 
 	}
@@ -51,16 +54,14 @@ public class BookController {
 	@PreAuthorize("hasRole('ADMIN')")
 	@PostMapping()
 	public ResponseEntity<BookEntity> addBook(@RequestBody BookEntity book) {
-
+		log.trace(">> addBook");
 		Optional<Library> library = libraryrepo.findById(book.getLibId());
 		if (!library.isPresent()) {
 
 			throw new LibraryEntityNotFoundException("Library id is wrong it doesnot exist");
 		}
 		BookEntity response = bookRepository.save(book);
-
 		return new ResponseEntity<BookEntity>(response, HttpStatus.CREATED);
-
 	}
 
 }

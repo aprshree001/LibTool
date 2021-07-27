@@ -56,8 +56,11 @@ public class BorroServiceImpl implements BorrowServiceInterface {
 		}
 
 		Optional<BorrowEntity> borrowEntityOptional = borrowRepo.findByUserIdAndBookId(
+				
 				userRepo.findByEmail(SecurityContextUtil.getUserNameFromContext()).getUserId(),
-				borrowRequestDto.getBookid());
+				borrowRequestDto.getBookid()
+				
+				);
 		BorrowEntity borrowEntity;
 		if (borrowEntityOptional.isPresent()) {
 			borrowEntity = borrowEntityOptional.get();

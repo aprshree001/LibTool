@@ -19,7 +19,9 @@ import com.library.service.BorrowServiceInterface;
 import com.library.utility.SecurityContextUtil;
 
 import dto.BorrowRequestDto;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 @RepositoryRestController
 @RequestMapping("/api/borrow")
 public class BorrowController {
@@ -36,16 +38,17 @@ public class BorrowController {
 	@PreAuthorize("hasRole('USER')")
 	@PostMapping("/addBook")
 	public ResponseEntity<BorrowEntity> addBook(@RequestBody BorrowRequestDto borrowRequest) {
-	
+		log.trace(">> addBook");
+
 		BorrowEntity response = borrowService.addBookToBorrowItems(borrowRequest);
 		return new ResponseEntity<BorrowEntity>(response, HttpStatus.OK);
-	
+
 	}
 
 	@PreAuthorize("hasRole('USER')")
 	@GetMapping("/myborrowedItems")
 	public ResponseEntity<List<BorrowEntity>> getBookBorrowedByMe() {
-
+		log.trace(">>  getBookBorrowedByMe");
 		List<BorrowEntity> response = borrowService
 				.findByUserId(userRep.findByEmail(SecurityContextUtil.getUserNameFromContext()).getUserId());
 
